@@ -1,10 +1,18 @@
 const form = document.querySelector('#form')
 const searchInput = document.querySelector('#search')
 const songsContainer = document.querySelector('#songs-container')
-const prevAndNextContainer = document.querySelector('#prov-and-next-container')
+const prevAndNextContainer = document.querySelector('#prev-and-next-container')
 
 const apiUrl = `https://api.lyrics.ovh`
 
+const getMoreSongs = async url => {
+    const response = await fetch(`https://cors-anywhere.herokuapp.com/${url}`)
+    const data = await response.json()
+
+    insertSongsIntoPage(data)
+}
+
+// inserir lis na tela de acordo com a resposta
 const insertSongsIntoPage = songsInfo => {
     songsContainer.innerHTML = songsInfo.data.map(song => `
         <li class="song">
@@ -12,6 +20,16 @@ const insertSongsIntoPage = songsInfo => {
             <button class="btn" data-artist="${song.artist.name}" data-song-title="${song.title}">Ver letra</button>
         </li>
     `).join('')
+
+    if (songsInfo.prev || songsInfo.next) {
+        prevAndNextContainer.innerHTML = `
+            ${songsInfo.prev ? `<button class="btn" onclick="getMoreSongs('${songsInfo.prev}')">Anteriores</button>` : '' }
+            ${songsInfo.next ? `<button class="btn" onclick="getMoreSongs('${songsInfo.next}')">Próximas</button>` : '' }
+        `
+        return
+    }
+
+    prevAndNextContainer.innerHTML = ''
 }
 
 // requisição de acordo com o que foi digitado no input
